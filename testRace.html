@@ -10,17 +10,100 @@
             margin: 0;
             overflow: hidden;
             /* Hide scrollbars */
+            background-color: #333;
+            /* Set background color */
+            color: #fff;
+            /* Set text color */
+            font-family: Arial, sans-serif;
+            /* Choose font family */
+        }
+
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: block;
+        }
+
+        #menuTitle {
+            font-size: 36px;
+            margin-bottom: 40px;
+        }
+
+        #menuButton {
+            display: block;
+            width: 200px;
+            padding: 10px 20px;
+            margin: 10px auto;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            background-color: transparent;
+            color: #fff;
+            font-size: 18px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #menuButton:hover {
+            background-color: #fff;
+            color: #333;
+        }
+
+        #option {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+        }
+
+        #optionButton {
+            display: none;
+            width: 100px;
+            margin-top: 20px;
+            margin-left: 20px;
+            padding: 10px 20px;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            background-color: transparent;
+            color: #fff;
+            font-size: 18px;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #optionButton:hover {
+            background-color: #fff;
+            color: #333;
         }
 
         canvas {
-            display: block;
+            display: none;
         }
     </style>
 </head>
 
 <body>
+    <div id="optionButton" onclick="pauseGame()">Options</div>
     <canvas id="gameCanvas"></canvas>
     <script src="testRace.js"></script>
+    <div id="menu">
+        <h1 id="menuTitle">Car Racing Game</h1>
+        <span id="menuButton" onclick="startGame()">Start Game</span>
+    </div>
+    <div id="option">
+        <h1 id="menuTitle">Options</h1>
+        <span id="menuButton" onclick="pauseGame()">Resume</span>
+        <span id="menuButton">Settings</span>
+        <span id="menuButton" onclick="mainMenu()">Main Menu</span>
+    </div>
+
 </body>
 
 </html>

@@ -160,10 +160,10 @@ function handleMouseClick(event) {
                 mathQuestionBox.draw(ctx, question, options, "", ""); // Clear the response from the MathQuestionBox
                 generateNewQuestion(); // Generate a new question after clearing the response
             }, 2000);
-            
+
             // Accelerate car 1
             car.accelerate(0.3); // Adjust the speed increment as needed
-            
+
             // Start the timer for stopping car 1
             setTimeout(stopCar, 3000); // Adjust the time as needed
         } else {
@@ -189,8 +189,44 @@ function stopCar() {
     carMoves = false;
 }
 
+function pauseGame() {
+    if (!paused) {
+        cancelAnimationFrame(animationId); // Pause the animation
+        paused = true;
+
+        // Remove mouse click for math questions
+        canvas.removeEventListener("click", handleMouseClick);
+
+        // Hide the game canvas
+        document.getElementById("gameCanvas").style.display = "none";
+
+        // Display options
+        document.getElementById("option").style.display = "block";
+
+        // Hide the option button
+        document.getElementById("optionButton").style.display = "none";
+        
+    } else {
+        animationId = requestAnimationFrame(draw); // Resume the animation
+        paused = false;
+        
+        // Add back mouse click for math questions
+        canvas.addEventListener("click", handleMouseClick);
+
+        // Hide the game canvas
+        document.getElementById("gameCanvas").style.display = "block";
+
+        // Hide options
+        document.getElementById("option").style.display = "none";
+
+        // Display the option button
+        document.getElementById("optionButton").style.display = "block";
+    }
+}
+
 // Main game loop
 function draw() {
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -213,7 +249,36 @@ function draw() {
     car2.moveRight(canvas.width);
 
     // Request animation frame
-    requestAnimationFrame(draw);
+    animationId = requestAnimationFrame(draw);
+
+}
+
+function startGame() {
+    // Hide the menu
+    document.getElementById("menu").style.display = "none";
+
+    // Display the canvas and start the game
+    document.getElementById("gameCanvas").style.display = "block";
+
+    // Display the option button
+    document.getElementById("optionButton").style.display = "block";
+
+    // Start the game loop
+    draw();
+}
+
+function mainMenu() {
+    // Stop the game
+    cancelAnimationFrame(animationId);
+
+    // Hide the game screen
+    document.getElementById("gameCanvas").style.display = "none";
+
+    // Hide the options screen
+    document.getElementById("option").style.display = "none";
+
+    // Display main menu
+    document.getElementById("menu").style.display = "block";
 }
 
 // Get canvas element and context
@@ -239,10 +304,10 @@ let options = generateOptions(correctAnswer);
 let resColor = "";
 let response = "";
 
+let animationId;
+let paused = false;
+
 let carMoves = false;
 
-// Add event listener for mouse clicks
+// Add event listener for math questions
 canvas.addEventListener("click", handleMouseClick);
-
-// Start the game loop
-draw();
