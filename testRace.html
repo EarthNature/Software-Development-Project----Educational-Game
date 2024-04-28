@@ -83,6 +83,14 @@
             color: #333;
         }
 
+        #difficultyScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+        }
         canvas {
             display: none;
         }
@@ -90,20 +98,25 @@
 </head>
 
 <body>
+    <script src="testRace.js"></script>
+    <script src="mathQuestions.js"></script>
     <div id="optionButton" onclick="pauseGame()">Options</div>
     <canvas id="gameCanvas"></canvas>
-    <script src="testRace.js"></script>
     <div id="menu">
         <h1 id="menuTitle">Car Racing Game</h1>
-        <span id="menuButton" onclick="startGame()">Start Game</span>
+        <span id="menuButton" onclick="showDifficultyOptions()">Singleplayer</span>
     </div>
     <div id="option">
         <h1 id="menuTitle">Options</h1>
         <span id="menuButton" onclick="pauseGame()">Resume</span>
-        <span id="menuButton">Settings</span>
         <span id="menuButton" onclick="mainMenu()">Main Menu</span>
     </div>
-
+    <div id="difficultyScreen">
+        <h1 id="menuTitle">Select Difficulty</h1>
+        <span id="menuButton" onclick="startGame('easy')">Easy</span>
+        <span id="menuButton" onclick="startGame('medium')">Medium</span>
+        <span id="menuButton" onclick="startGame('hard')">Hard</span>
+    </div>
 </body>
 
 </html>
