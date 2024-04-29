@@ -27,12 +27,12 @@ function generateEasyMathQuestion() {
         // Basic arithmetic operations
         let num1, num2;
         if (topic === '/') {
-            // Ensure no division by zero
-            num1 = Math.floor(Math.random() * 20);
-            num2 = Math.floor(Math.random() * 20) + 1;
+            // Ensure no division by zero and that the result is an integer
+            num2 = Math.floor(Math.random() * 10) + 1; // divisor
+            num1 = num2 * (Math.floor(Math.random() * 10) + 1); // dividend
         } else {
-            num1 = Math.floor(Math.random() * 100);
-            num2 = Math.floor(Math.random() * 100);
+            num1 = Math.floor(Math.random() * 20);
+            num2 = Math.floor(Math.random() * 20);
         }
         question = `${num1} ${topic} ${num2}`;
         answer = topic === '+' ? num1 + num2 :
@@ -81,8 +81,10 @@ function generateWrongAnswerEasy(correctAnswer, topic) {
         } while (wrongAnswer === correctAnswer);
     } else if (topic === '/') {
         // For division, generate a wrong answer by dividing the correct answer by a random number
+        let divisor;
         do {
-            wrongAnswer = correctAnswer / (Math.floor(Math.random() * 5) + 2); // Random divisor between 2 and 6
+            divisor = Math.floor(Math.random() * 5) + 2; // Random divisor between 2 and 6
+            wrongAnswer = Math.round(correctAnswer / divisor); // Round the division result to the nearest integer
         } while (wrongAnswer === correctAnswer);
     } else if (topic === 'linear') {
         // For linear equations, generate a wrong answer by adding or subtracting a random number
@@ -299,6 +301,7 @@ function generateWrongAnswerHard(correctAnswer, topic) {
 // Generate options for the math question, including one correct answer and three wrong answers
 function generateOptions(correctAnswer, level, topic) {
     const options = [correctAnswer];
+    const wrongAnswers = new Set(); // Use a Set to store unique wrong answers
     while (options.length < 4) {
         let wrongAnswer;
         if (level === 'easy') {
@@ -311,7 +314,11 @@ function generateOptions(correctAnswer, level, topic) {
             console.error('Invalid level specified');
             return;
         }
-        options.push(wrongAnswer);
+        if (!wrongAnswers.has(wrongAnswer)) {
+            // Add the wrong answer to the options if it's unique
+            options.push(wrongAnswer);
+            wrongAnswers.add(wrongAnswer);
+        }
     }
     return options.sort(() => Math.random() - 0.5);
 }

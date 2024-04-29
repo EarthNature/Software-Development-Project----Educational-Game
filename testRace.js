@@ -267,8 +267,8 @@ function startGame(difficulty) {
     canvas.height = window.innerHeight;
 
     // Initialize game objects
-    car = new Car(0, canvas.height / 4 - 30, 50, 30, "blue", 2);
-    car2 = new Car(0, canvas.height / 4 + 40, 50, 30, "red", 0.5);
+    car = new Car(0, canvas.height / 4 - 30, 50, 30, "blue", 0.1);
+    car2 = new Car(0, canvas.height / 4 + 40, 50, 30, "red", 0.1);
     road = new Road(canvas.height / 4, canvas.width, 5, "gray");
     road2 = new Road(canvas.height / 4 + 70, canvas.width, 5, "gray");
     mathQuestionBox = new MathQuestionBox(canvas.width - canvas.width / 1.05, canvas.height / 4 + 150, canvas.width / 1.1, canvas.height / 2, "lightgray");
