@@ -252,7 +252,6 @@ generateMathQuestion = function (difficulty) {
     try {
         if (difficulty === 'easy') {
             generateEasyMathQuestion();
-            console.log("easy selected");
         } else if (difficulty === 'medium') {
             generateMediumMathQuestion();
         } else if (difficulty === 'hard') {
@@ -267,9 +266,7 @@ generateMathQuestion = function (difficulty) {
 // Generate a new question and options for the math question box
 generateNewQuestion = function () {
     generateMathQuestion(mathQuestionBox.level);
-    console.log("new question generated");
     generateOptions(mathQuestionBox.correctAnswer, mathQuestionBox.level, mathQuestionBox.topic);
-    console.log("options filled");
 }
 
 // Easy Level
