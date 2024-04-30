@@ -5,17 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Race Adventures</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
     <style>
         body {
             margin: 0;
             overflow: hidden;
             /* Hide scrollbars */
-            /*background-color: #333;*/
+            background-color: #333;
             /* Set background color */
-            background-image: url("img/grassy_plains.jpg");
-            color: #000000;
+            /*background-image: url("img/grassy_plains.jpg");*/
+            color: #ffffff;
             /* Set text color */
-            font-family: Arial, sans-serif;
+            /*font-family: Arial, sans-serif; */
+            font-family: 'Roboto', sans-serif;
             /* Choose font family */
         }
 
@@ -30,7 +32,7 @@
 
         #menuTitle {
             font-size: 36px;
-            margin-bottom: 40px;
+            text-shadow: 2px 2px 5px rgb(136, 65, 191);
         }
 
         #menuButton {
@@ -43,6 +45,7 @@
             background-color: transparent;
             color: #fff;
             font-size: 18px;
+            text-shadow: 2px 2px 5px rgb(52, 126, 183);
             text-decoration: none;
             cursor: pointer;
             transition: background-color 0.3s, color 0.3s;
@@ -73,6 +76,7 @@
             background-color: transparent;
             color: #fff;
             font-size: 18px;
+            text-shadow: 2px 2px 5px rgb(136, 65, 191);
             text-decoration: none;
             text-align: center;
             cursor: pointer;
@@ -96,6 +100,10 @@
         canvas {
             display: none;
         }
+
+        hr {
+            margin-bottom: 50px;
+        }
     </style>
 </head>
 
@@ -104,19 +112,23 @@
     <canvas id="gameCanvas"></canvas>
     <div id="menu">
         <h1 id="menuTitle">Math Race Adventures</h1>
-        <span id="menuButton" onclick="showDifficultyOptions()">Singleplayer</span>
-        <span id="menuButton">Multiplayer</span>
+        <hr>
+        <p></p>
+        <span id="menuButton" style="text-shadow: 2px 2px 5px rgb(49, 127, 59)" onclick="showDifficultyOptions()">Singleplayer</span>
+        <span id="menuButton" style="text-shadow: 2px 2px 5px rgb(33, 17, 155)">Multiplayer</span>
     </div>
     <div id="option">
         <h1 id="menuTitle">Options</h1>
+        <hr>
         <span id="menuButton" onclick="pauseGame()">Resume</span>
         <span id="menuButton" onclick="displayMainMenu()">Main Menu</span>
     </div>
     <div id="difficultyScreen">
         <h1 id="menuTitle">Select Difficulty</h1>
+        <hr>
         <span id="menuButton" onclick="startGame('easy')">Easy</span>
-        <span id="menuButton" onclick="startGame('medium')">Medium</span>
-        <span id="menuButton" onclick="startGame('hard')">Hard</span>
+        <span id="menuButton" style="text-shadow: 2px 2px 5px rgb(176, 170, 51)" onclick="startGame('medium')">Medium</span>
+        <span id="menuButton" style="text-shadow: 2px 2px 5px rgb(181, 69, 29)" onclick="startGame('hard')">Hard</span>
     </div>
 </body>
 
@@ -153,8 +165,6 @@
     let timer1;
     let timer2;
     let animationId;
-
-    
 
     resizeCanvas = function () {
         canvas.width = window.innerWidth;

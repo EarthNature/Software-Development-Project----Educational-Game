@@ -28,7 +28,7 @@ Car = function (x, y, width, height, color, speed, image, name) {
     self.draw = function (ctx) {
         ctx.drawImage(self.image, 0, 0, self.image.width, self.image.height, self.x, drawY, self.width, self.height);
         ctx.fillStyle = "#ffffff";
-        ctx.font = "12px Arial";
+        ctx.font = "12px Roboto";
         ctx.fillText(self.name, self.x + 10, self.y + 5);
     };
 
@@ -71,22 +71,26 @@ MathQuestionBox = function (x, y, width, height, color) {
         super_draw(ctx);
 
         ctx.fillStyle = "black";
-        ctx.font = "16px Arial";
-        ctx.fillText(question, self.x + 10, self.y + 20);
+        ctx.font = "20px Roboto";
+        ctx.fillText("Question", self.x + 10, self.y + 20);
 
         ctx.fillStyle = "black";
-        ctx.font = "14px Arial";
+        ctx.font = "20px Roboto";
+        ctx.fillText(question + " = ?", self.x + 10, self.y + 50);
+
+        ctx.fillStyle = "black";
+        ctx.font = "20px Roboto";
         options.forEach((option, index) => {
             ctx.strokeStyle = "black";
             ctx.lineWidth = 1;
-            ctx.strokeRect(self.x + 10, self.y + 40 + 20 * index, self.width - 20, 20);
-            ctx.fillText(String.fromCharCode(65 + index) + ". " + option, self.x + 20, self.y + 55 + 20 * index);
+            ctx.strokeRect(self.x + 10, self.y + 60 + 30 * index, self.width - 20, 25);
+            ctx.fillText(String.fromCharCode(65 + index) + ". " + option, self.x + 20, self.y + 80 + 30 * index);
         });
 
         // Draw the response text
         ctx.fillStyle = responseColor;
-        ctx.font = "16px Arial";
-        ctx.fillText(response, self.x + 20, self.y + self.height / 2);
+        ctx.font = "16px Roboto";
+        ctx.fillText(response, self.x + 20, self.y + self.height / 1.7);
     }
 
     return self;
@@ -137,6 +141,7 @@ startGame = function (difficulty) {
     car.x = 0;
     car.speed = 0.1;
     car2.x = 0;
+    car2.speed = 0.1;
     car.image = Img.car;
     car2.image = Img.car2;
     paused = false;
@@ -211,7 +216,7 @@ drawResponse = function (res, color) {
 drawGameState = function (color, text) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = color;
-    ctx.font = "40px Arial";
+    ctx.font = "40px Roboto";
     ctx.fillText(text, canvas.width / 2 - 80, canvas.height / 2);
 
     clearTimeout(timer1);
@@ -226,8 +231,8 @@ handleMouseClick = function (event) {
 
         if (response) return;
 
-        const optionHeight = 20;
-        const optionY = mathQuestionBox.y + 40;
+        const optionHeight = 30;
+        const optionY = mathQuestionBox.y + 60;
         const optionIndex = Math.floor((mouseY - optionY) / optionHeight);
 
         if (optionIndex >= 0 && optionIndex < mathQuestionBox.options.length) {
@@ -241,7 +246,7 @@ handleMouseClick = function (event) {
                     responseColor = "";
                     generateNewQuestion();
                 }, 3000);
-
+                car2.speed = 0.1;
                 car.accelerate(0.3);
                 timer2 = setTimeout(stopCar, 3000);
             } else {
@@ -251,6 +256,8 @@ handleMouseClick = function (event) {
                     responseColor = "";
                     generateNewQuestion();
                 }, 3000);
+                car.speed = 0.1;
+                car2.accelerate(0.3);
             }
         }
     } catch (error) {
