@@ -8,7 +8,7 @@ Entity = function (x, y, width, height, color) {
         color: color,
     }
 
-    self.draw = function (ctx) {
+    self.draw = function (ctx) {    
         ctx.fillStyle = self.color;
         ctx.fillRect(self.x, self.y, self.width, self.height);
     }
@@ -16,10 +16,21 @@ Entity = function (x, y, width, height, color) {
     return self;
 }
 
-Car = function (x, y, width, height, color, speed) {
+Car = function (x, y, width, height, color, speed, image, name) {
     let self = Entity(x, y, width, height, color);
 
     self.speed = speed;
+    self.image = image;
+    self.name = name;
+
+    let drawY = (self.y + (self.height - self.image.height) / 4);
+    
+    self.draw = function (ctx) {
+        ctx.drawImage(self.image, 0, 0, self.image.width, self.image.height, self.x, drawY, self.width, self.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "12px Arial";
+        ctx.fillText(self.name, self.x + 10, self.y + 5);
+    };
 
     self.moveLeft = function () {
         self.x -= self.speed;
@@ -118,10 +129,16 @@ displayMainMenu = function () {
 startGame = function (difficulty) {
     canvas.removeEventListener("click", handleMouseClick);
     displayGame();
+    Img.car = new Image();
+    Img.car.src = "img/" + getRandomImage(vehicleImage);
+    Img.car2 = new Image();
+    Img.car2.src = "img/" + getRandomImage(vehicleImage);
 
     car.x = 0;
     car.speed = 0.1;
     car2.x = 0;
+    car.image = Img.car;
+    car2.image = Img.car2;
     paused = false;
     carMoves = false;
     responseColor = "";
@@ -270,7 +287,7 @@ generateNewQuestion = function () {
 }
 
 // Easy Level
-generateEasyMathQuestion = function() {
+generateEasyMathQuestion = function () {
     const topics = ['+', '-', '*', '/'];
     const topic = topics[Math.floor(Math.random() * topics.length)];
 
@@ -290,7 +307,7 @@ generateEasyMathQuestion = function() {
             num2 = Math.floor(Math.random() * 20) + 1;
             break;
         case '/':
-            num2 = Math.floor(Math.random() * 20) + 2; 
+            num2 = Math.floor(Math.random() * 20) + 2;
             num1 = num2 * (Math.floor(Math.random() * 20) + 3);
             break;
     }
@@ -416,9 +433,9 @@ generateHardMathQuestion = function () {
             // Generate trigonometry questions
             const angles = ['sin', 'cos', 'tan'];
             const angle = angles[Math.floor(Math.random() * angles.length)];
-            const value = Math.floor(Math.random() * 90) + 1; 
+            const value = Math.floor(Math.random() * 90) + 1;
             question = `Find the value of ${angle}(${value}°)`;
-            answer = Math[angle](value * (Math.PI / 180)); 
+            answer = Math[angle](value * (Math.PI / 180));
             break;
         case 'calculus':
             // Generate calculus questions
@@ -449,7 +466,7 @@ generateHardMathQuestion = function () {
 }
 
 // Generate a wrong answer that is different from the correct answer for easy questions
-generateWrongAnswerEasy = function(correctAnswer, topic) {
+generateWrongAnswerEasy = function (correctAnswer, topic) {
     let wrongAnswer;
 
     switch (topic) {
