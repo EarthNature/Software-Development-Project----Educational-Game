@@ -3,10 +3,14 @@ let app = express();
 let serv = require('http').Server(app);
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/client/test.html');
+    res.sendFile(__dirname + '/client/interface.html');
 });
-
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/server/game.js');
+});
 app.use('/client', express.static(__dirname + '/client'));
+app.use('/server', express.static(__dirname + '/server'));
+app.use('/img', express.static(__dirname + '/img'));
 
 
 
@@ -77,44 +81,3 @@ io.sockets.on('connection', function(socket) {
         }
     })
 });
-
-sendMathQuestion = function () {
-    let question = generateMathQuestion();
-    io.sockets.emit('mathQuestion', question);
-}
-
-generateMathQuestion = function () {
-    let num1 = Math.floor(Math.random() * 10) + 1;
-    let num2 = Math.floor(Math.random() * 10) + 1;
-    let operator = ['+', '-', '*', '/'][Math.floor(Math.random() * 4)];
-    let question = num1 + ' ' + operator + ' ' + num2;
-    let answer = eval(question);
-    return { question: question, answer: answer };
-}
-
-setInterval(function () {
-    let lobbyPacks = {};
-    for (let i in PLAYER_LIST) {
-        let player = PLAYER_LIST[i];
-        //player.x++;
-        if (!lobbyPacks[player.lobby]) {
-            lobbyPacks[player.lobby] = [];
-        }
-        lobbyPacks[player.lobby].push({
-            x: player.x,
-            y: player.y,
-            role: player.role,
-            name: player.name
-        });
-    }
-
-    for (let i in SOCKET_LIST) {
-        let socket = SOCKET_LIST[i];
-        let player = PLAYER_LIST[socket.id];
-        if (lobbyPacks[player.lobby]) {
-            socket.emit('newPositions', lobbyPacks[player.lobby]);
-        }
-    }
-}, 60);
-
-sendMathQuestion();
