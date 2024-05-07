@@ -18,7 +18,7 @@ let DEBUG = false;
 
 let USERS = {
     //username: password
-    "admin": "",
+    "admin": "admin",
 }
 
 let isValidPassword = function(data, cb) {
