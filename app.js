@@ -10,7 +10,7 @@ app.get('/', function (req, res) {
 app.use('/client', express.static(__dirname + '/client'));
 app.use('/img', express.static(__dirname + '/img'));
 
-serv.listen(2000);
+serv.listen(process.env.PORT || 2000);
 console.log("Server started.");
 
 let socket_list = {};
