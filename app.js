@@ -1,83 +1,128 @@
+require('./Player');
+
 let express = require('express');
 let app = express();
 let serv = require('http').Server(app);
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/client/interface.html');
-});
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/server/game.js');
+    res.sendFile(__dirname + '/client/index.html');
 });
 app.use('/client', express.static(__dirname + '/client'));
-app.use('/server', express.static(__dirname + '/server'));
 app.use('/img', express.static(__dirname + '/img'));
-
-
 
 serv.listen(2000);
 console.log("Server started.");
 
-let SOCKET_LIST = {};
-let PLAYER_LIST = {};
-let playerCount = 0;
-let lobbyCount = 1;
-let canvas_width;
-let canvas_height;
+let socket_list = {};
+let DEBUG = false;
 
-Player = function (y, id, role, lobby) {
-    let self = {
-        x: 0,
-        y: y,
-        id: id,
-        role: role,
-        name: "",
-        lobby: lobby
-    }
-    return self;
+let USERS = {
+    //username: password
+    "admin": "",
 }
 
-let io = require('socket.io') (serv, {});
+let isValidPassword = function(data, cb) {
+    setTimeout(function() {
+        cb(USERS[data.username] === data.password);
+    }, 10);
+}
+
+let isUsernameTaken = function(data, cb) {
+    setTimeout(function() {
+        cb(USERS[data.username]);
+    }, 10);
+}
+
+let addUser = function(data, cb) {
+    setTimeout(function() {
+        USERS[data.username] = data.password;
+        cb();
+    }, 10);
+}
+
+let io = require('socket.io')(serv, {});
 io.sockets.on('connection', function(socket) {
+    console.log('A user connected');
     socket.id = Math.random();
-    SOCKET_LIST[socket.id] = socket;
-    let y, role, lobby;
+    socket_list[socket.id] = socket;
 
-    if (playerCount % 2 === 0) {
-        lobbyCount++;
-        console.log("playerCount: " + playerCount);
-        console.log("lobbyCount: " + lobbyCount);
-    }
-    lobby = lobbyCount;
-
-    if (playerCount % 2 === 0) {
-        y = canvas_height / 4 - 30;
-        role = 'Player 1';
-    } else if (playerCount % 2 === 1) {
-        y = canvas_height / 4 + 40;
-        role = 'Player 2';
-    }
-        
-    let player = Player(y, socket.id, role, lobby);
-    PLAYER_LIST[socket.id] = player;
-    playerCount++;
-    console.log("playerCount: " + playerCount);
-    console.log("lobbyCount: " + lobbyCount);
-
-    socket.on('canvasSize', function(size) {
-        canvas_width = size.width;
-        canvas_height = size.height;
+    socket.on('canvasSize', function(data) {
+        Player.setCanvasSize(data.width, data.height);
     });
 
-    socket.on('disconnect', function () {
-        delete SOCKET_LIST[socket.id];
-        delete PLAYER_LIST[socket.id];
-        playerCount--;
-        console.log("playerCount: " + playerCount);
-        console.log("lobbyCount: " + lobbyCount);
-        if (playerCount % 2 === 0) {
-            lobbyCount--;
-            console.log("playerCount: " + playerCount);
-            console.log("lobbyCount: " + lobbyCount);
+    socket.on('signIn', function(data) {
+        isValidPassword(data, function(res) {
+            if (res) {
+                socket.username = data.username;               
+                socket.emit('signInResponse', {success: true});
+            } else {
+                socket.emit('signInResponse', {success: false});
+            }
+        });     
+    }); 
+
+    socket.on('signUp', function(data) {
+        isUsernameTaken(data, function(res) {
+            if (res) {
+                socket.emit('signUpResponse', {success: false});
+            } else {
+                addUser(data, function() {
+                    socket.emit('signUpResponse', {success: true});
+                });            
+            }
+        });       
+    }); 
+
+    socket.on('setLobby', function() {
+        Player.onConnect(socket, socket.username);
+    });
+
+    socket.on('sendMsgToServer', function(data) {
+        for (let i in socket_list) {
+            socket_list[i].emit('addToChat', socket.username + ': ' + data);
         }
+    });
+
+    socket.on('sendPmToServer', function(data) {
+        let recipientSocket = null;
+
+        for (let i in socket_list) {
+            if (socket_list[i].username === data.username) {
+                recipientSocket = socket_list[i];
+            }
+        }
+        if (recipientSocket === null) {
+            socket.emit('addToChat', 'The player ' + data.username + ' is not online.');
+        } else {
+            recipientSocket.emit('addToChat', 'From ' + socket.username + ':' + data.message);
+            socket.emit('addToChat', 'To ' + data.username + ':' + data.message);
+        }
+    });
+
+    socket.on('disconnect', function() {
+        delete socket_list[socket.id];
+        Player.onDisconnect(socket);
+    });
+
+    socket.on('leaveLobby', function() {
+        Player.onDisconnect(socket);
+    });
+
+    socket.on('evalServer', function(data) {
+        if(!DEBUG) {
+            return;
+        }
+        let res = eval(data);
+        socket.emit('evalAnswer', res);
     })
 });
+
+setInterval(function () {
+    let packs = Player.getFrameUpdateData();
+    for (let i in socket_list) {
+        let socket = socket_list[i];
+        socket.emit('init', packs.initPack);
+        socket.emit('update', packs.updatePack);
+        socket.emit('remove', packs.removePack);
+    }
+} , 60);

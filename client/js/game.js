@@ -8,7 +8,7 @@ Entity = function (x, y, width, height, color) {
         color: color,
     }
 
-    self.draw = function (ctx) {    
+    self.draw = function (ctx) {
         ctx.fillStyle = self.color;
         ctx.fillRect(self.x, self.y, self.width, self.height);
     }
@@ -25,7 +25,7 @@ Car = function (x, y, width, height, color, speed, image, name) {
     self.game;
 
     let drawY = self.y + 10;
-    
+
     self.draw = function (ctx) {
         ctx.drawImage(self.image, 0, 0, self.image.width, self.image.height, self.x, drawY, self.width, self.height);
         ctx.fillStyle = "#ffffff";
@@ -97,34 +97,41 @@ MathQuestionBox = function (x, y, width, height, color) {
     return self;
 }
 
+// Function to get random image
+getRandomImage = function (images) {
+    return images[Math.floor(Math.random() * images.length)];
+}
+
 //-------*** Game Logic ***-------//
-// Display the difficulty options
-showDifficultyOptions = function (game) {
-    car.game = game;
-    display("none", "block", "none", "none", "none", "none");
+// Function to select game mode
+selectType = function (gt) {
+    gameType = gt;
+    if (gameType === 'SP') {
+        display('none', 'block', 'none', 'none', 'none', 'none', 'none', 'none', 'none', 'none');
+    }
+    if (gameType === 'MP') {
+        display('none', 'none', 'none', 'none', 'none', 'none', 'block', 'none', 'none', 'none');
+    }
 }
 
 // Function to manipulate display
-display = function (a, b, c, d, e, f) {
+display = function (a, b, c, d, e, f, g, h, i, j) {
     document.getElementById("menu").style.display = a;
     document.getElementById("difficultyScreen").style.display = b;
     document.getElementById("gameCanvas").style.display = c;
     document.getElementById("option").style.display = d;
     document.getElementById("optionButton").style.display = e;
     document.getElementById("gameStateScreen").style.display = f;
-}
-
-// Display the main menu
-displayMainMenu = function () {
-        clearGame();
-        display("block", "none", "none", "none", "none", "none");
-        canvas.removeEventListener("click", handleMouseClick);
-
+    document.getElementById("signDiv").style.display = g;
+    document.getElementById("globalChat").style.display = h;
+    document.getElementById("returnLobby").style.display = i;
+    document.getElementById("waitingScreen").style.display = j;
 }
 
 // Start the game
 startGame = function (difficulty) {
-        display("none", "none", "block", "none", "block", "none");
+    display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+    if (gameType === 'SP') {
         Img.car = new Image();
         Img.car.src = "../img/" + getRandomImage(vehicleImage);
         Img.car2 = new Image();
@@ -132,7 +139,6 @@ startGame = function (difficulty) {
 
         car.x = 0;
         car.speed = 0.1;
-        car.game = game;
         car2.x = 0;
         car2.speed = 0.1;
         car.image = Img.car;
@@ -146,21 +152,80 @@ startGame = function (difficulty) {
         generateNewQuestion();
         canvas.addEventListener("click", handleMouseClick);
 
-        setInterval(draw, 40);
-        return mathQuestionBox;
-}
+        interval = setInterval(draw, 40);
+    }
+    if (gameType === 'MP') {
+        display("none", "none", "block", "none", "block", "none", "none", "none", "none", "block");
+        socket.emit('setLobby');
 
-// Pause the game
-pauseGame = function () {
-        if (!paused) {
-            paused = true;
-            canvas.removeEventListener("click", handleMouseClick);
-            display("none", "none", "none", "block", "none", "none");
-        } else {
-            paused = false; 
-            canvas.addEventListener("click", handleMouseClick);
-            display("none", "none", "block", "none", "block", "none");
-        }   
+        mathQuestionBox.level = difficulty;
+
+        generateNewQuestion();
+        canvas.addEventListener("click", checkAnswer);
+
+        interval2 = setInterval(function () {
+            resizeGame();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!Player.list[selfId]) {
+                return;
+            }
+
+            let currentLobby = Player.list[selfId].lobby;
+            let checkLobby = 0;
+            let winningPlayer = null;
+            let losingPlayer = null;
+            let gameEnded = false;
+
+            for (let i in Player.list) {
+                let player = Player.list[i];
+                if (player.lobby === currentLobby) {
+                    checkLobby++;
+                    if (player.x + player.width >= canvas.width) {
+                        winningPlayer = player;
+                    } else {
+                        losingPlayer = player;
+                    }
+                }
+            }
+
+            if (checkLobby == 2) {
+                display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+                inLobby = true;
+                road.draw(ctx);
+                road2.draw(ctx);
+                for (let i in Player.list) {
+                    let player = Player.list[i];
+                    if (player.lobby === currentLobby) {
+                        Img.player = new Image();
+                        Img.player.src = '/client/img/' + player.image;
+                        player.draw();
+                    }
+                }
+                mathQuestionBox.draw(ctx, mathQuestionBox.question, mathQuestionBox.options, response, responseColor);
+            }
+
+            if (winningPlayer && losingPlayer) {
+                gameEnded = true;
+                drawGameState("green", "You Win!", winningPlayer.id);
+                drawGameState("red", "Game Over!", losingPlayer.id);
+            }
+
+            if (inLobby == true && checkLobby == 1) {
+                inLobby = false;
+                checkLobby = 0;
+                gameEnded = true;
+                drawGameState("green", "You Win!");
+            }
+
+            if (gameEnded) {
+                clearInterval(interval2);
+            }
+
+            checkLobby = 0;
+        }, 60);
+    }
+
 }
 
 // Main game loop
@@ -195,10 +260,58 @@ draw = function () {
 
 // Function to clear canvas
 clearGame = function () {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        //cancelAnimationFrame(animationId);
-        clearTimeout(timer1);
-        clearTimeout(timer2);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearTimeout(timer1);
+    clearTimeout(timer2);
+}
+
+// Function to display option
+displayOption = function () {
+    if (gameType === 'SP') {
+        if (!paused) {
+            paused = true;
+            canvas.removeEventListener("click", handleMouseClick);
+            display("none", "none", "none", "block", "none", "none", "none", "none", "none", "none");
+        } else {
+            paused = false;
+            canvas.addEventListener("click", handleMouseClick);
+            display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+        }
+    }
+    if (gameType === 'MP') {
+        if (!paused) {
+            paused = true;
+            canvas.removeEventListener("click", handleMouseClick);
+            display("none", "none", "none", "block", "none", "none", "none", "none", "block", "none");
+        } else {
+            paused = false;
+            canvas.addEventListener("click", handleMouseClick);
+            display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+        }
+    }
+
+}
+
+// Display the main menu
+displayMainMenu = function () {
+    if (gameType === 'SP') {
+        display("block", "none", "none", "none", "none", "none", "none", "none", "none", "none");
+        clearGame();
+        canvas.removeEventListener("click", handleMouseClick);
+        clearInterval(interval);
+    }
+
+    if (gameType === 'MP') {
+        display("block", "none", "none", "none", "none", "none", "none", "none", "none", "none");
+        canvas.removeEventListener("click", checkAnswer);
+        socket.emit('leaveLobby');
+    }
+}
+
+// Function to display lobby
+returnLobby = function () {
+    display('none', 'none', 'none', 'none', 'none', 'none', 'none', 'block', 'none', 'none');
+    socket.emit('leaveLobby');
 }
 
 // Draw response text on the canvas
@@ -208,51 +321,85 @@ drawResponse = function (res, color) {
 }
 
 // Draw "You Win" or "Game Over" screen
-drawGameState = function (color, text) {
-    display("none", "none", "none", "none", "block", "block");
-    document.getElementById("gameStateTitle").innerText = text;
-    document.getElementById("gameStateTitle").style.color = color;
+drawGameState = function (color, text, playerId) {
+    if (!playerId || Player.list[selfId].id === playerId) {
+        display("none", "none", "none", "none", "block", "block", "none", "none", "none");
+        document.getElementById("gameStateTitle").innerText = text;
+        document.getElementById("gameStateTitle").style.color = color;
+    }
+}
+
+// Function to check answer
+checkAnswer = function (event) {
+    const rect = canvas.getBoundingClientRect();
+    const mouseY = event.clientY - rect.top;
+
+    if (response) return;
+
+    const optionHeight = 30;
+    const optionY = mathQuestionBox.y + 60;
+    const optionIndex = Math.floor((mouseY - optionY) / optionHeight);
+
+    if (optionIndex >= 0 && optionIndex < mathQuestionBox.options.length) {
+        const selectedOption = mathQuestionBox.options[optionIndex];
+
+        if (selectedOption === mathQuestionBox.correctAnswer) {
+            drawResponse("Correct!", "green");
+            socket.emit('mouseClick', { input: 'question', state: true });
+            socket.emit('setSpeed', true);
+            timer1 = setTimeout(() => {
+                response = "";
+                responseColor = "";
+                generateNewQuestion();
+                socket.emit('mouseClick', { input: 'question', state: false });
+            }, 2000);
+        } else {
+            drawResponse("Wrong! The correct answer is: " + mathQuestionBox.correctAnswer, "red");
+            socket.emit('setSpeed', false);
+            timer1 = setTimeout(() => {
+                response = "";
+                responseColor = "";
+                generateNewQuestion();
+            }, 2000);
+        }
+    }
 }
 
 // Handle mouse clicks on the canvas to select options for the math question
 handleMouseClick = function (event) {
-    try {
-        const rect = canvas.getBoundingClientRect();
-        const mouseY = event.clientY - rect.top;
+    const rect = canvas.getBoundingClientRect();
+    const mouseY = event.clientY - rect.top;
 
-        if (response) return;
+    if (response) return;
 
-        const optionHeight = 30;
-        const optionY = mathQuestionBox.y + 60;
-        const optionIndex = Math.floor((mouseY - optionY) / optionHeight);
+    const optionHeight = 30;
+    const optionY = mathQuestionBox.y + 60;
+    const optionIndex = Math.floor((mouseY - optionY) / optionHeight);
 
-        if (optionIndex >= 0 && optionIndex < mathQuestionBox.options.length) {
-            const selectedOption = mathQuestionBox.options[optionIndex];
+    if (optionIndex >= 0 && optionIndex < mathQuestionBox.options.length) {
+        const selectedOption = mathQuestionBox.options[optionIndex];
 
-            if (selectedOption === mathQuestionBox.correctAnswer) {
-                drawResponse("Correct!", "green");
-                carMoves = true;
-                timer1 = setTimeout(() => {
-                    response = "";
-                    responseColor = "";
-                    generateNewQuestion();
-                }, 3000);
-                car2.speed = 0.1;
-                car.accelerate(0.3);
-                timer2 = setTimeout(stopCar, 3000);
-            } else {
-                drawResponse("Wrong! The correct answer is: " + mathQuestionBox.correctAnswer, "red");
-                timer1 = setTimeout(() => {
-                    response = "";
-                    responseColor = "";
-                    generateNewQuestion();
-                }, 3000);
-                car.speed = 0.1;
-                car2.accelerate(0.3);
-            }
+        if (selectedOption === mathQuestionBox.correctAnswer) {
+            drawResponse("Correct!", "green");
+            carMoves = true;
+            timer1 = setTimeout(() => {
+                response = "";
+                responseColor = "";
+                generateNewQuestion();
+            }, 2000);
+            car2.speed = 0.1;
+            car.accelerate(0.3);
+            timer2 = setTimeout(stopCar, 3000);
+        } else {
+            drawResponse("Wrong! The correct answer is: " + mathQuestionBox.correctAnswer, "red");
+            timer1 = setTimeout(() => {
+                response = "";
+                responseColor = "";
+                generateNewQuestion();
+            }, 2000);
+            car.speed = 0.1;
+            car2.accelerate(0.3);
         }
-    } catch (error) {
-        console.error("An error occurred in handling mouse click:", error);
     }
 }
 
