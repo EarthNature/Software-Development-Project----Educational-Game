@@ -348,10 +348,13 @@ checkAnswer = function (event) {
             socket.emit('mouseClick', { input: 'question', state: true });
             socket.emit('setSpeed', true);
             timer1 = setTimeout(() => {
+                socket.emit('mouseClick', { input: 'question', state: false });
+            }, 3000);
+
+            timer2 = setTimeout(() => {
                 response = "";
                 responseColor = "";
                 generateNewQuestion();
-                socket.emit('mouseClick', { input: 'question', state: false });
             }, 2000);
         } else {
             drawResponse("Wrong! The correct answer is: " + mathQuestionBox.correctAnswer, "red");
