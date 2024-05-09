@@ -198,7 +198,7 @@ startGame = function (difficulty) {
                     let player = Player.list[i];
                     if (player.lobby === currentLobby) {
                         Img.player = new Image();
-                        Img.player.src = '/client/img/' + player.image;
+                        Img.player.src = '../img/' + player.image;
                         player.draw();
                     }
                 }
