@@ -114,20 +114,6 @@ selectType = function (gt) {
     }
 }
 
-// Function to manipulate display
-display = function (a, b, c, d, e, f, g, h, i, j) {
-    document.getElementById("menu").style.display = a;
-    document.getElementById("difficultyScreen").style.display = b;
-    document.getElementById("gameCanvas").style.display = c;
-    document.getElementById("option").style.display = d;
-    document.getElementById("optionButton").style.display = e;
-    document.getElementById("gameStateScreen").style.display = f;
-    document.getElementById("signDiv").style.display = g;
-    document.getElementById("globalChat").style.display = h;
-    document.getElementById("returnLobby").style.display = i;
-    document.getElementById("waitingScreen").style.display = j;
-}
-
 // Start the game
 startGame = function (difficulty) {
     display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
@@ -155,7 +141,7 @@ startGame = function (difficulty) {
         interval = setInterval(draw, 40);
     }
     if (gameType === 'MP') {
-        display("none", "none", "block", "none", "block", "none", "none", "none", "none", "block");
+        display("none", "none", "none", "none", "block", "none", "none", "none", "none", "block");
         socket.emit('setLobby');
 
         mathQuestionBox.level = difficulty;
@@ -190,7 +176,9 @@ startGame = function (difficulty) {
             }
 
             if (checkLobby == 2) {
-                display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+                if (!inLobby) {
+                    display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+                }
                 inLobby = true;
                 road.draw(ctx);
                 road2.draw(ctx);
@@ -261,8 +249,23 @@ draw = function () {
 // Function to clear canvas
 clearGame = function () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearInterval(interval);
     clearTimeout(timer1);
     clearTimeout(timer2);
+}
+
+// Function to manipulate display
+display = function (a, b, c, d, e, f, g, h, i, j) {
+    document.getElementById("menu").style.display = a;
+    document.getElementById("difficultyScreen").style.display = b;
+    document.getElementById("gameCanvas").style.display = c;
+    document.getElementById("option").style.display = d;
+    document.getElementById("optionButton").style.display = e;
+    document.getElementById("gameStateScreen").style.display = f;
+    document.getElementById("signDiv").style.display = g;
+    document.getElementById("globalChat").style.display = h;
+    document.getElementById("returnLobby").style.display = i;
+    document.getElementById("waitingScreen").style.display = j;
 }
 
 // Function to display option
@@ -282,11 +285,20 @@ displayOption = function () {
         if (!paused) {
             paused = true;
             canvas.removeEventListener("click", handleMouseClick);
+            if (document.getElementById('waitingScreen').style.display === 'block') {
+                waitingScreen = true;
+            }
             display("none", "none", "none", "block", "none", "none", "none", "none", "block", "none");
         } else {
             paused = false;
+            inLobby = false;
             canvas.addEventListener("click", handleMouseClick);
-            display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+            if (waitingScreen) {
+                display("none", "none", "block", "none", "block", "none", "none", "none", "none", "block");
+                waitingScreen = false;
+            } else {
+                display("none", "none", "block", "none", "block", "none", "none", "none", "none", "none");
+            }
         }
     }
 
@@ -298,7 +310,6 @@ displayMainMenu = function () {
         display("block", "none", "none", "none", "none", "none", "none", "none", "none", "none");
         clearGame();
         canvas.removeEventListener("click", handleMouseClick);
-        clearInterval(interval);
     }
 
     if (gameType === 'MP') {

@@ -199,8 +199,7 @@
         <h1 id="menuTitle">Select Difficulty</h1>
         <hr>
         <div id="menuButton" onclick="startGame('easy')">Easy</div>
-        <div id="menuButton" style="text-shadow: 2px 2px 5px rgb(176, 170, 51)" onclick="startGame('medium')">Medium
-        </div>
+        <div id="menuButton" style="text-shadow: 2px 2px 5px rgb(176, 170, 51)" onclick="startGame('medium')">Medium</div>
         <div id="menuButton" style="text-shadow: 2px 2px 5px rgb(181, 69, 29)" onclick="startGame('hard')">Hard</div>
         <div id="returnLobby" style="display: none;" onclick="returnLobby()">Return Lobby</div>
         <div id="menuButton" onclick="displayMainMenu()">Main Menu</div>
@@ -227,9 +226,7 @@
         <form id="chat-form" style="margin-bottom: 50px;">
             <input id="chat-input" type="text" style="width: 500px"></input>
         </form>
-        <div id="menuButton"
-            onclick="display('none', 'block', 'none', 'none', 'none', 'none', 'none', 'none', 'block', 'none');">Start Game
-        </div>
+        <div id="menuButton" onclick="display('none', 'block', 'none', 'none', 'none', 'none', 'none', 'none', 'block', 'none');">Start Game</div>
     </div>
     <div id="waitingScreen">
         <h1 id="menuTitle">Waiting for player to join...</h1>
@@ -252,7 +249,7 @@
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    let gameType, paused, inLobby, timer1, timer2, interval, interval2;
+    let gameType, paused, inLobby, timer1, timer2, interval, interval2, waitingScreen;
     let playerCount = 0;
     let lobbyCount = 0;
     let response = "";
